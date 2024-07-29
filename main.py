@@ -5,9 +5,11 @@ import musiclib
 import appslib
 import reply
 import urllib.parse
+import requests
 
 # Initialize the text-to-speech engine
 engine = pyttsx3.init()
+newsapi = "your api"
 
 def speak(text):
     print(text)
@@ -28,7 +30,16 @@ def search(user_input):
     encoded_search_term = urllib.parse.quote(search_term)
     search_url = f"https://www.google.com/search?q={encoded_search_term}"
     webbrowser.open(search_url)
- 
+
+def get_news_and_speak(newsapi):
+    r = requests.get(f"https://newsapi.org/v2/top-headlines?country=in&apiKey={newsapi}")
+    if r.status_code == 200:
+        data = r.json()
+        articles = data.get('articles', [])
+        for article in articles:
+            speak(article['title'])
+    else:
+        speak("Failed to retrieve news headlines")
 def processcommand(c):
     print(c)
     if c.lower().startswith("open"):
@@ -53,6 +64,9 @@ def processcommand(c):
     elif c.lower().startswith("search"):
         srch = c.lower().split(" ",1)[1]
         search(srch)
+    elif "news" in c.lower(): 
+        newsapi = "your api"
+        get_news_and_speak(newsapi)
     elif c.lower() == "exit":
         speak("Exiting Pluto. Goodbye!")
         return False
@@ -71,7 +85,7 @@ if __name__ == "__main__":
         try:
             with sr.Microphone() as source:
                 print("Listening!")
-                audio = r.listen(source, timeout=2, phrase_time_limit=5)
+                audio = r.listen(source, timeout=2, phrase_time_limit=1)
             word = r.recognize_google(audio)
             print(word)
             if "pluto" in word.lower():
