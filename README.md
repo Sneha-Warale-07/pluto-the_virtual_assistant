@@ -1,5 +1,5 @@
 # pluto-the_virtual_assistant
-<h1> virtual assistant named pluto <br> </h1>
+<h2> virtual assistant named pluto <br> </h2>
 <p> It is an assistant which can open apps , play songs, tell you the news ,search anything you want , can talk to you and many more<br>
 appslib stores all apps and its link to open<br>
 musiclib stores sogs and their respective youtube video links <br>
