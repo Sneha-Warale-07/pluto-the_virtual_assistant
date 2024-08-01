@@ -5,16 +5,56 @@ import musiclib
 import appslib
 import reply
 import urllib.parse
-import requests
+import requests 
+from gtts import gTTS
+import os
+import pygame
+import time 
 
-# Initialize the text-to-speech engine
-engine = pyttsx3.init()
-newsapi = "your api"
+newsapi = "a8e54685f93747db8b9b08e94161bb63"
 
 def speak(text):
     print(text)
-    engine.say(text)
-    engine.runAndWait()
+    tts = gTTS(text=text, lang='en')
+    tts.save("output.mp3")
+    
+    pygame.mixer.init()
+    pygame.mixer.music.load("output.mp3")
+    pygame.mixer.music.play()
+    
+    # Wait for the audio to finish playing
+    while pygame.mixer.music.get_busy():
+        time.sleep(0.5)
+    
+    pygame.mixer.music.unload()  # Unload the music to release the file
+    os.remove("output.mp3")  # Clean up the file after playing
+
+def search(user_input):
+    search_term = user_input
+    speak(f"Searching {user_input}")
+
+    # DuckDuckGo search API
+    search_url = f"https://api.duckduckgo.com/?q={search_term}&format=json&pretty=1"
+
+    response = requests.get(search_url)
+    if response.status_code == 200:
+        results = response.json()
+        if "AbstractText" in results and results["AbstractText"]:
+            snippet = results["AbstractText"]
+            print(f"Snippet: {snippet}")
+            speak(snippet)
+        elif "RelatedTopics" in results and results["RelatedTopics"]:
+            for item in results["RelatedTopics"]:
+                if "Text" in item:
+                    snippet = item.get("Text")
+                    print(f"Snippet: {snippet}")
+                    speak(snippet)
+                    break  # remove this if you want to read more than one result
+        else:
+            speak("No results found")
+    else:
+        speak("Failed to retrieve search results")
+
 
 def get_reply(user_input):
     print(user_input)
@@ -24,9 +64,9 @@ def get_reply(user_input):
             return reply.reply[key]
     return "Sorry, I didn't understand that."
 
-def search(user_input):
+def searchlib(user_input):
     search_term = user_input
-    speak(f"searching {user_input}")
+    speak(f"Searching for {user_input}")
     encoded_search_term = urllib.parse.quote(search_term)
     search_url = f"https://www.google.com/search?q={encoded_search_term}"
     webbrowser.open(search_url)
@@ -62,17 +102,16 @@ def processcommand(c):
         response = get_reply(c)
         speak(response)
     elif c.lower().startswith("search"):
-        srch = c.lower().split(" ",1)[1]
-        search(srch)
+        search_term = c.lower().split(" ", 1)[1]
+        searchlib(search_term)
     elif "news" in c.lower(): 
-        newsapi = "your api"
+        newsapi = "a8e54685f93747db8b9b08e94161bb63"
         get_news_and_speak(newsapi)
     elif c.lower() == "exit":
         speak("Exiting Pluto. Goodbye!")
         return False
     else:
-        speak("Command not recognized.")
-        print("Error: Command not recognized")
+        search(c.lower())
     return True
 
 if __name__ == "__main__":
@@ -85,7 +124,7 @@ if __name__ == "__main__":
         try:
             with sr.Microphone() as source:
                 print("Listening!")
-                audio = r.listen(source, timeout=2, phrase_time_limit=1)
+                audio = r.listen(source, timeout=5, phrase_time_limit=1)
             word = r.recognize_google(audio)
             print(word)
             if "pluto" in word.lower():
@@ -95,6 +134,7 @@ if __name__ == "__main__":
                     print("Pluto active....")
                     audio = r.listen(source)
                     commands =r.recognize_google(audio)
+                    print(commands)
                     processcommand(commands)
             elif any(key in word.lower() for key in reply.reply):
                 response = get_reply(word)
