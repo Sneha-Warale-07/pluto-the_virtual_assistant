@@ -9,5 +9,5 @@ music={
     "zalima" : "https://www.youtube.com/watch?v=n9wsYQWjne0",
     "ve kamleya":"https://www.youtube.com/watch?v=XLM2VML3z3o",
     "husn":"https://www.youtube.com/watch?v=1gEoVHEr_hU",
-    "pehle bhi me" : "https://www.youtube.com/watch?v=kZGpkkfk2lA"
+    "pehle bhi me" : "https://www.youtube.com/watch?v=kZGpkkfk2lAs"
 }
